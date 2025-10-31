@@ -7,7 +7,8 @@ from tabulate import tabulate
 FILES_DIR = 'test_files'
 
 
-def get_parser_args(parser):
+def get_parser_args(parser) -> tuple:
+    """Функция получения аргументов командной строки."""
 
     parser.add_argument(
         '--files',
@@ -28,7 +29,8 @@ def get_parser_args(parser):
 
 
 def get_report_data(files_data: list, files_dir: str) -> dict:
-
+    """Функция парсинга файлов csv."""
+    
     elem_report = {}
 
     for elem in files_data:
@@ -45,7 +47,8 @@ def get_report_data(files_data: list, files_dir: str) -> dict:
 
 
 def print_report_table(report_name: str, report_data: dict):
-    
+    """Функция консольного вывода таблицы с результатами."""
+
     table = tabulate(
         report_data,
         headers = ['brand', 'rating'],
