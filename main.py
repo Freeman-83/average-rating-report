@@ -17,9 +17,9 @@ def get_parser_args(parser: ArgumentParser) -> tuple:
 
     parser.add_argument(
         '--report',
+        type=str,
         choices=list(REPORT_CHOISES),
         default='brand-rating-average',
-        type=str,
         help='Выберите тип отчета'
     )
     parser.add_argument(
@@ -77,7 +77,7 @@ def print_report_table(
         report_data,
         headers = [position_row, culculating_row],
         tablefmt='outline',
-        showindex=(indx for indx, _ in enumerate(report_data, start=1))
+        showindex=range(1, len(report_data) + 1)
     )
 
     print(report_name, table, sep='\n')
