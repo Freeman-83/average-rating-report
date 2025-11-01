@@ -20,19 +20,19 @@ def get_parser_args(parser: ArgumentParser) -> tuple:
         choices=list(REPORT_CHOISES),
         default='brand-rating-average',
         type=str,
-        help='Наименование отчета'
+        help='Выберите тип отчета'
     )
     parser.add_argument(
         '--files',
         type=str,
         nargs="+",
-        help='Выберите файлы'
+        help='Введите наименования файлов для составления отчета'
     )
     parser.add_argument(
         '--dir-path',
         default='./files/',
         type=str,
-        help='Путь к файлам'
+        help='Задайте путь к файлам'
     )
 
     report_name = parser.parse_args().report
