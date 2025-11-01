@@ -32,7 +32,7 @@ def get_parser_args(parser: ArgumentParser) -> tuple:
         '--dir-path',
         default='./files/',
         type=str,
-        help='Директория с файлами'
+        help='Путь к файлам'
     )
 
     report_name = parser.parse_args().report
@@ -87,15 +87,19 @@ def main():
 
     parser = ArgumentParser(description='Report')
 
-    report_name, files_data, dir_path = get_parser_args(parser)
+    try:
+        report_name, files_data, dir_path = get_parser_args(parser)
 
-    report_data, position_row, culculating_row = create_report_data(
-        files_data,
-        dir_path,
-        *REPORT_CHOISES[report_name]
-    )
+        report_data, position_row, culculating_row = create_report_data(
+            files_data,
+            dir_path,
+            *REPORT_CHOISES[report_name]
+        )
 
-    print_report_table(report_name, report_data, position_row, culculating_row)
+        print_report_table(report_name, report_data, position_row, culculating_row)
+    
+    except Exception as e:
+        print(f'Ошибка в работе программы: {e}')
 
 
 if __name__ == '__main__':
