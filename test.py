@@ -6,4 +6,4 @@ from main import (
 
 
 def test_get_parser_args():
-    
+    ...

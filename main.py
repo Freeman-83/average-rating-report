@@ -75,7 +75,7 @@ def print_report_table(
 
     table = tabulate(
         report_data,
-        headers = [position_row, culculating_row],
+        headers=[position_row, culculating_row],
         tablefmt='outline',
         showindex=range(1, len(report_data) + 1)
     )
@@ -96,8 +96,13 @@ def main():
             *REPORT_CHOISES[report_name]
         )
 
-        print_report_table(report_name, report_data, position_row, culculating_row)
-    
+        print_report_table(
+            report_name,
+            report_data,
+            position_row,
+            culculating_row
+        )
+
     except Exception as e:
         print(f'Ошибка в работе программы: {e}')
 
