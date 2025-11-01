@@ -47,8 +47,8 @@ def create_report_data(
     dir_path: str,
     position_row: str,
     culculating_row: str
-) -> tuple[list, str, str]:
-    """Функция парсинга файлов csv и формирования сводного отчета."""
+) -> tuple:
+    """Функция парсинга csv файлов и формирования сводного отчета."""
 
     summary_report = {}
 
