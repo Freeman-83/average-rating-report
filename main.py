@@ -50,16 +50,16 @@ def create_report_data(
 ) -> tuple[list, str, str]:
     """Функция парсинга файлов csv и формирования сводного отчета."""
 
-    elem_report = {}
+    summary_report = {}
 
     for current_file in files_data:
 
         with open(f'{dir_path}{current_file}', mode='r') as file:
             csv_reader = csv.DictReader(file)
             for row in csv_reader:
-                elem_report.setdefault(row[position_row], []).append(float(row[culculating_row]))
+                summary_report.setdefault(row[position_row], []).append(float(row[culculating_row]))
 
-    report_data = [[key, round(sum(values_list) / len(values_list), 2)] for key, values_list in elem_report.items()]
+    report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
     report_data.sort(key=lambda i: i[1], reverse=True)
 
     return report_data, position_row, culculating_row
