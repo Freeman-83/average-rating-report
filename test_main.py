@@ -1,46 +1,94 @@
-from argparse import ArgumentParser
+import pytest
+
+from argparse import ArgumentError, Namespace 
 
 from main import (
-    create_parser,
+    get_parser_args,
     create_report_data,
-    print_report_table
+    print_report_table,
+    main
 )
 
+tests_args_data = {
+    'correct_args': [
+        '--report', 'average-rating',
+        '--files', 'products1.csv', 'products2.csv'
+    ],
+    'correct_args_without_report_name': [
+        '--files', 'products1.csv', 'products2.csv'
+    ],
+    'correct_args_without_files': [
+        '--report', 'average-rating'
+    ],
+    'empty_args': ['--report', '', '--files', ''],
+    'incorrect_name_args': [
+        '--report', 'nonexistent_report',
+        '--files', 'nonexistent_file.csv'
+    ],
+    'incorrect_type_args': ['--report', 1, '--files', True],
+}
 
-# def test_create_parser():
 
-#     # args = get_parser_args(parser)
+def test_get_parser_args():
+    """Проверка корректности параметров и аргументов."""
 
-#     # print(parser.argument_default)
+    expected_namespace = Namespace(
+        report='average-rating',
+        files=['products1.csv', 'products2.csv']
+    )
+    current_parser_namespace = get_parser_args(
+        tests_args_data['correct_args']
+    )
 
-#     # print(list(dict(args)))
-
-#     args_list = ['report', 'files', 'dir_path']
-
-    # for i in range(len(args)):
-    #     assert args[i] == args_list[i]
+    assert current_parser_namespace == expected_namespace
 
 
-# 'brand-rating-average', 'products1.csv products2.csv'
+def test_get_parser_args_without_report_name():
+    """Проверка работы программы без указания наименования отчета."""
+
+    with pytest.raises(
+        ArgumentError,
+        match='Не выбран параметр наименования отчета'
+    ):
+        get_parser_args(
+            tests_args_data['correct_args_without_report_name']
+        )
+
+
+def test_get_parser_args_without_files():
+    """Проверка работы программы без указания файлов для парсинга."""
+
+    with pytest.raises(
+        ArgumentError,
+        match='Не выбран параметр с файлами для составления отчета'
+    ):
+        get_parser_args(
+            tests_args_data['correct_args_without_files']
+        )
+
+
+def test_get_parser_args_with_incorrect_type():
+    """Проверка работы программы с некорректными типами данных."""
+
+    with pytest.raises(TypeError):
+        get_parser_args(
+            tests_args_data['incorrect_type_args']
+        )
 
 
 def test_create_report_data():
+    """Проверка создания сводного отчета."""
 
-    parser = ArgumentParser(description='test-parser')
+    args = get_parser_args(tests_args_data['correct_args'])
 
-    res = parser.parse_args(['--files', 'products1.csv', 'products2.csv'])
-
-    # files_data = ['products1.csv', 'products2.csv']
-    # dir_path = './files/'
-    # position_row = 'brand'
-    # culculating_row = 'rating'
-
-    res = (
+    test_report_data = (
+        'average-rating',
         [['apple', 4.55], ['samsung', 4.53], ['xiaomi', 4.37]],
-        'brand',
-        'rating'
+        ['brand', 'rating']
     )
 
     assert create_report_data(
-        parser
-    ) == res
+        args.report,
+        args.files,
+        dir_path='files'
+    ) == test_report_data

@@ -1,75 +1,83 @@
 import csv
+import os
 import sys
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentError
 from tabulate import tabulate
 
 
 REPORT_CHOISES = {
-    'brand-rating-average': ['brand', 'rating'],
-    'brand-price-average': ['brand', 'price'],
-    'name-rating-average': ['name', 'rating'],
-    'name-price-average': ['name', 'price'],
+    'average-rating': ['brand', 'rating'],
+    # 'average-price': ['brand', 'price'],
 }
 
 
-def create_parser():
-    """Функция получения аргументов командной строки."""
+def check_parser_args(report_param, files_param, args):
 
+    if not args.report:
+        raise ArgumentError(
+            report_param, 'Не выбран параметр наименования отчета'
+        )
+    if not args.files:
+        raise ArgumentError(
+            files_param, 'Не выбран параметр с файлами для составления отчета'
+        )
+
+
+def check_type_args(arg):
+    if not isinstance(arg, str):
+        raise TypeError('Некорректный тип данных аргументов')
+    return arg
+
+
+def get_parser_args(args=None):
+    """Функция получения аргументов командной строки."""
+    
     parser = ArgumentParser(description='Report Parser')
 
-    parser.add_argument(
+    report = parser.add_argument(
         '--report',
-        type=str,
+        type=check_type_args,
         choices=list(REPORT_CHOISES),
-        default='brand-rating-average',
         help='Наименование отчета'
     )
-    parser.add_argument(
+    files = parser.add_argument(
         '--files',
-        type=str,
-        nargs="+",
-        help='Наименования файлов для составления отчета'
-    )
-    parser.add_argument(
-        '--dir-path',
-        type=str,
-        default='./files/',
-        help='Директория с файлами'
+        type=check_type_args,
+        nargs='+',
+        help='Перечень файлов для составления отчета',
     )
 
-    return parser
+    parser_args = parser.parse_args(args)
+
+    check_parser_args(report, files, parser_args)
+
+    return parser_args
 
 
-def create_report_data(parser: ArgumentParser) -> tuple:
+def create_report_data(report_name, files_data, dir_path) -> tuple:
     """Функция парсинга csv файлов и формирования сводного отчета."""
 
-    args = parser.parse_args()
-
-    report_name = args.report
-    files_data = args.files
-    dir_path = args.dir_path
     position_value, culculated_value = REPORT_CHOISES[report_name]
 
-    if files_data:
+    summary_report = {}
 
-        summary_report = {}
-
+    try:
         for current_file in files_data:
-
-            with open(f'{dir_path}{current_file}', mode='r') as file:
+            with open(os.path.join(dir_path, current_file), mode='r') as file:
                 csv_reader = csv.DictReader(file)
                 for row in csv_reader:
                     summary_report.setdefault(row[position_value], []).append(float(row[culculated_value]))
+    except:
+       raise Exception('Директория или файл не найдены')
 
-        report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
-        report_data.sort(key=lambda i: i[1], reverse=True)
+    
+    report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
+    report_data.sort(key=lambda i: i[1], reverse=True)
 
-        headers = [position_value, culculated_value]
+    headers = [position_value, culculated_value]
 
-        return report_name, report_data, headers
-
-    sys.exit('Не указаны файлы для парсинга!')
+    return report_name, report_data, headers
 
 
 def print_report_table(
@@ -92,10 +100,16 @@ def print_report_table(
 def main():
 
     try:
-        parser = create_parser()
+        args = get_parser_args()
+
+        print(args)
+
+        dir_path = input('Введите путь к месту расположения файлов: ')
 
         report_name, report_data, headers = create_report_data(
-            parser
+            args.report,
+            args.files,
+            dir_path
         )
 
         print_report_table(
