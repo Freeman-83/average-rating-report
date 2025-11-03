@@ -1,4 +1,5 @@
 import csv
+import sys
 
 from argparse import ArgumentParser
 from tabulate import tabulate
@@ -12,70 +13,75 @@ REPORT_CHOISES = {
 }
 
 
-def get_parser_args(parser: ArgumentParser) -> tuple:
+def create_parser():
     """Функция получения аргументов командной строки."""
+
+    parser = ArgumentParser(description='Report Parser')
 
     parser.add_argument(
         '--report',
         type=str,
         choices=list(REPORT_CHOISES),
         default='brand-rating-average',
-        help='Выберите тип отчета'
+        help='Наименование отчета'
     )
     parser.add_argument(
         '--files',
         type=str,
         nargs="+",
-        help='Введите наименования файлов для составления отчета'
+        help='Наименования файлов для составления отчета'
     )
     parser.add_argument(
         '--dir-path',
-        default='./files/',
         type=str,
-        help='Задайте путь к файлам'
+        default='./files/',
+        help='Директория с файлами'
     )
 
-    report_name = parser.parse_args().report
-    files_data = parser.parse_args().files
-    dir_path = parser.parse_args().dir_path
-
-    return report_name, files_data, dir_path
+    return parser
 
 
-def create_report_data(
-    files_data: list,
-    dir_path: str,
-    position_row: str,
-    culculating_row: str
-) -> tuple:
+def create_report_data(parser: ArgumentParser) -> tuple:
     """Функция парсинга csv файлов и формирования сводного отчета."""
 
-    summary_report = {}
+    args = parser.parse_args()
 
-    for current_file in files_data:
+    report_name = args.report
+    files_data = args.files
+    dir_path = args.dir_path
+    position_value, culculated_value = REPORT_CHOISES[report_name]
 
-        with open(f'{dir_path}{current_file}', mode='r') as file:
-            csv_reader = csv.DictReader(file)
-            for row in csv_reader:
-                summary_report.setdefault(row[position_row], []).append(float(row[culculating_row]))
+    if files_data:
 
-    report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
-    report_data.sort(key=lambda i: i[1], reverse=True)
+        summary_report = {}
 
-    return report_data, position_row, culculating_row
+        for current_file in files_data:
+
+            with open(f'{dir_path}{current_file}', mode='r') as file:
+                csv_reader = csv.DictReader(file)
+                for row in csv_reader:
+                    summary_report.setdefault(row[position_value], []).append(float(row[culculated_value]))
+
+        report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
+        report_data.sort(key=lambda i: i[1], reverse=True)
+
+        headers = [position_value, culculated_value]
+
+        return report_name, report_data, headers
+
+    sys.exit('Не указаны файлы для парсинга!')
 
 
 def print_report_table(
     report_name: str,
     report_data: dict,
-    position_row: str,
-    culculating_row: str
+    headers: list
 ):
     """Функция консольного вывода отчетной таблицы."""
 
     table = tabulate(
         report_data,
-        headers=[position_row, culculating_row],
+        headers=headers,
         tablefmt='outline',
         showindex=range(1, len(report_data) + 1)
     )
@@ -85,22 +91,17 @@ def print_report_table(
 
 def main():
 
-    parser = ArgumentParser(description='Report')
-
     try:
-        report_name, files_data, dir_path = get_parser_args(parser)
+        parser = create_parser()
 
-        report_data, position_row, culculating_row = create_report_data(
-            files_data,
-            dir_path,
-            *REPORT_CHOISES[report_name]
+        report_name, report_data, headers = create_report_data(
+            parser
         )
 
         print_report_table(
             report_name,
             report_data,
-            position_row,
-            culculating_row
+            headers
         )
 
     except Exception as e:
