@@ -67,12 +67,12 @@ def create_report_data(
     report_name: str,
     files_data: list,
     dir_path: str
-) -> tuple[str, list]:
+) -> tuple[str, list, list]:
     """Функция парсинга csv файлов и формирования сводного отчета."""
 
     position_value, culculated_value = REPORT_CHOISES[report_name]
 
-    summary_report = {}
+    summary_report: dict[str, list] = {}
 
     for current_file in files_data:
         try:
