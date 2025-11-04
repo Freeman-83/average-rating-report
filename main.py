@@ -2,7 +2,7 @@ import csv
 import os
 import sys
 
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
 from tabulate import tabulate
 
 
@@ -12,7 +12,7 @@ REPORT_CHOISES = {
 }
 
 
-def check_parser_args(report_param, files_param, args):
+def check_exist_parser_args(report_param, files_param, args):
     """Вспомогательная функция проверки наличия аргументов."""
 
     if not args.report:
@@ -23,6 +23,13 @@ def check_parser_args(report_param, files_param, args):
         raise ArgumentError(
             files_param, 'Не выбран параметр файлов для составления отчета'
         )
+    
+
+def check_empty_input(arg):
+    """Вспомогательная функция проверки непустого ввода."""
+    if not arg:
+        raise ArgumentTypeError('Пустой ввод значения аргумета')
+    return arg
 
 
 def get_parser_args(args=None):
@@ -32,20 +39,20 @@ def get_parser_args(args=None):
 
     report = parser.add_argument(
         '--report',
-        type=str,
+        type=check_empty_input,
         choices=list(REPORT_CHOISES),
         help='Наименование отчета'
     )
     files = parser.add_argument(
         '--files',
-        type=str,
+        type=check_empty_input,
         nargs='+',
         help='Перечень файлов для составления отчета',
     )
 
     parser_args = parser.parse_args(args)
 
-    check_parser_args(report, files, parser_args)
+    check_exist_parser_args(report, files, parser_args)
 
     return parser_args
 

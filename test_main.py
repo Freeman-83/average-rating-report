@@ -1,6 +1,6 @@
 import pytest
 
-from argparse import ArgumentError, Namespace 
+from argparse import ArgumentError, ArgumentTypeError, Namespace 
 
 from main import (
     get_parser_args,
@@ -13,19 +13,20 @@ tests_args_data = {
         '--report', 'average-rating',
         '--files', 'products1.csv', 'products2.csv'
     ],
-    'correct_args_without_report_name': [
+    'args_data_without_report_name': [
         '--files', 'products1.csv', 'products2.csv'
     ],
-    'correct_args_without_files': [
+    'args_data_without_files': [
         '--report', 'average-rating'
     ],
-    'empty_args': ['--report', '', '--files', ''],
     'incorrect_type_args': ['--report', 1, '--files', True],
+    'empty_args': ['--report', '', '--files', ''],
+    'params_without_args': ['--report', '--files'],
 }
 
 
 def test_get_parser_args():
-    """Проверка корректности параметров и аргументов."""
+    """Проверка корректности передаваемых параметров и аргументов."""
 
     expected_namespace = Namespace(
         report='average-rating',
@@ -39,35 +40,43 @@ def test_get_parser_args():
 
 
 def test_get_parser_args_without_report_name():
-    """Проверка работы программы без указания наименования отчета."""
+    """Проверка обработки ввода данных без наименования отчета."""
 
     with pytest.raises(
         ArgumentError,
         match='Не выбран параметр наименования отчета'
     ):
         get_parser_args(
-            tests_args_data['correct_args_without_report_name']
+            tests_args_data['args_data_without_report_name']
         )
 
 
 def test_get_parser_args_without_files():
-    """Проверка работы программы без указания файлов для парсинга."""
+    """Проверка обработки ввода данных без файлов для формирования отчета."""
 
     with pytest.raises(
         ArgumentError,
         match='Не выбран параметр файлов для составления отчета'
     ):
         get_parser_args(
-            tests_args_data['correct_args_without_files']
+            tests_args_data['args_data_without_files']
         )
 
 
 def test_get_parser_args_with_incorrect_type():
-    """Проверка работы программы с некорректными типами данных."""
+    """Проверка обработки ввода некорректных типов данных аргументов."""
 
     with pytest.raises(TypeError):
         get_parser_args(
             tests_args_data['incorrect_type_args']
+        )
+
+def test_get_empty_parser_args():
+    """Проверка обработки ввода пустых аргументов."""
+
+    with pytest.raises(SystemExit):
+        get_parser_args(
+            tests_args_data['empty_args']
         )
 
 
