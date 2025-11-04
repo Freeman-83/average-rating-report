@@ -23,18 +23,19 @@ def check_exist_parser_args(report_param, files_param, args) -> None:
 
     if not args.report:
         raise ArgumentError(
-            report_param, 'Не выбран параметр наименования отчета'
+            report_param, 'Не указано наименование отчета'
         )
     if not args.files:
         raise ArgumentError(
-            files_param, 'Не выбран параметр файлов для составления отчета'
+            files_param, 'Не выбраны файлы для составления отчета'
         )
 
 
 def check_empty_input(arg) -> str | None:
-    """Вспомогательная функция проверки непустого ввода."""
+    """Вспомогательная функция проверки пустого значения аргумента."""
+
     if not arg:
-        raise ArgumentTypeError('Пустой ввод значения аргумета')
+        raise ArgumentTypeError('Пустое значение аргумета')
     return arg
 
 
@@ -86,7 +87,7 @@ def create_report_data(
 
         except KeyError:
             raise KeyError(
-                f'В файле {current_file} отсутствует позиция {position_value}'
+                f'В файле "{current_file}" отсутствует позиция "{position_value}"'
             )
 
         except Exception:
@@ -110,7 +111,7 @@ def print_report_table(
     report_data: list,
     headers: list
 ) -> None:
-    """Функция консольного вывода отчетной таблицы."""
+    """Функция консольного вывода таблицы с отчетом."""
 
     report_table = tabulate(
         report_data,

@@ -8,8 +8,8 @@ from main import (
     print_report_table,
 )
 
-tests_args_data = {
-    'correct_args': [
+test_input_data = {
+    'correct_args_data': [
         '--report', 'average-rating',
         '--files', 'products1.csv', 'products2.csv'
     ],
@@ -41,7 +41,7 @@ def test_get_parser_args():
     }
 
     current_params_args = vars(
-        get_parser_args(tests_args_data['correct_args'])
+        get_parser_args(test_input_data['correct_args_data'])
     )
 
     assert current_params_args == expected_params_args
@@ -52,10 +52,10 @@ def test_get_parser_args_without_report_name():
 
     with pytest.raises(
         ArgumentError,
-        match='Не выбран параметр наименования отчета'
+        match='Не указано наименование отчета'
     ):
         get_parser_args(
-            tests_args_data['args_data_without_report_name']
+            test_input_data['args_data_without_report_name']
         )
 
 
@@ -64,10 +64,10 @@ def test_get_parser_args_without_files():
 
     with pytest.raises(
         ArgumentError,
-        match='Не выбран параметр файлов для составления отчета'
+        match='Не выбраны файлы для составления отчета'
     ):
         get_parser_args(
-            tests_args_data['args_data_without_files']
+            test_input_data['args_data_without_files']
         )
 
 
@@ -76,7 +76,7 @@ def test_get_parser_args_with_incorrect_type():
 
     with pytest.raises(TypeError):
         get_parser_args(
-            tests_args_data['incorrect_type_args']
+            test_input_data['incorrect_type_args']
         )
 
 
@@ -85,14 +85,14 @@ def test_get_empty_parser_args():
 
     with pytest.raises(SystemExit):
         get_parser_args(
-            tests_args_data['empty_args']
+            test_input_data['empty_args']
         )
 
 
 def test_create_report_data():
     """Проверка корректности создания сводного отчета."""
 
-    args = get_parser_args(tests_args_data['correct_args'])
+    args = get_parser_args(test_input_data['correct_args_data'])
 
     expected_report_data = (
         'average-rating',
@@ -100,11 +100,13 @@ def test_create_report_data():
         ['brand', 'rating']
     )
 
-    assert create_report_data(
+    current_report_data = create_report_data(
         args.report,
         args.files,
         dir_path='files'
-    ) == expected_report_data
+    )
+
+    assert current_report_data == expected_report_data
 
 
 def test_get_parser_files_with_nonexistent_position():
@@ -112,7 +114,7 @@ def test_get_parser_files_with_nonexistent_position():
 
     with pytest.raises(KeyError):
         args = get_parser_args(
-            tests_args_data['nonexistent_parsing_position']
+            test_input_data['nonexistent_parsing_position']
         )
         create_report_data(
             args.report,
@@ -126,7 +128,7 @@ def test_parsing_data_with_nonexistent_file():
 
     with pytest.raises(FileNotFoundError):
         args = get_parser_args(
-            tests_args_data['nonexistent_file']
+            test_input_data['nonexistent_file']
         )
         create_report_data(
             args.report,
@@ -138,7 +140,7 @@ def test_parsing_data_with_nonexistent_file():
 def test_print_report_data(capfd: pytest.CaptureFixture[str]):
     """Проверка формата печати таблицы сводного отчета."""
 
-    args = get_parser_args(tests_args_data['correct_args'])
+    args = get_parser_args(test_input_data['correct_args_data'])
 
     report_name, report_data, headers = create_report_data(
         args.report,
