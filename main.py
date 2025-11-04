@@ -13,6 +13,7 @@ REPORT_CHOISES = {
 
 
 def check_parser_args(report_param, files_param, args):
+    """Вспомогательная функция проверки наличия аргументов."""
 
     if not args.report:
         raise ArgumentError(
@@ -20,30 +21,24 @@ def check_parser_args(report_param, files_param, args):
         )
     if not args.files:
         raise ArgumentError(
-            files_param, 'Не выбран параметр с файлами для составления отчета'
+            files_param, 'Не выбран параметр файлов для составления отчета'
         )
-
-
-def check_type_args(arg):
-    if not isinstance(arg, str):
-        raise TypeError('Некорректный тип данных аргументов')
-    return arg
 
 
 def get_parser_args(args=None):
     """Функция получения аргументов командной строки."""
-    
+
     parser = ArgumentParser(description='Report Parser')
 
     report = parser.add_argument(
         '--report',
-        type=check_type_args,
+        type=str,
         choices=list(REPORT_CHOISES),
         help='Наименование отчета'
     )
     files = parser.add_argument(
         '--files',
-        type=check_type_args,
+        type=str,
         nargs='+',
         help='Перечень файлов для составления отчета',
     )
@@ -62,17 +57,25 @@ def create_report_data(report_name, files_data, dir_path) -> tuple:
 
     summary_report = {}
 
-    try:
-        for current_file in files_data:
-            with open(os.path.join(dir_path, current_file), mode='r') as file:
+    for current_file in files_data:
+        try:
+            current_files_path = os.path.join(dir_path, current_file)
+            with open(current_files_path, mode='r') as file:
                 csv_reader = csv.DictReader(file)
                 for row in csv_reader:
-                    summary_report.setdefault(row[position_value], []).append(float(row[culculated_value]))
-    except:
-       raise Exception('Директория или файл не найдены')
+                    summary_report.setdefault(
+                        row[position_value], []
+                    ).append(float(row[culculated_value]))
 
-    
-    report_data = [[key, round(sum(values) / len(values), 2)] for key, values in summary_report.items()]
+        except:
+            raise Exception(
+                f'Несуществующая директория или файл "{current_files_path}"'
+            )
+
+    report_data = [
+        [key, round(sum(values) / len(values), 2)]
+        for key, values in summary_report.items()
+    ]
     report_data.sort(key=lambda i: i[1], reverse=True)
 
     headers = [position_value, culculated_value]
@@ -82,7 +85,7 @@ def create_report_data(report_name, files_data, dir_path) -> tuple:
 
 def print_report_table(
     report_name: str,
-    report_data: dict,
+    report_data: list,
     headers: list
 ):
     """Функция консольного вывода отчетной таблицы."""
@@ -102,9 +105,7 @@ def main():
     try:
         args = get_parser_args()
 
-        print(args)
-
-        dir_path = input('Введите путь к месту расположения файлов: ')
+        dir_path = input('Укажите путь к месту расположения файлов: ')
 
         report_name, report_data, headers = create_report_data(
             args.report,
@@ -120,6 +121,7 @@ def main():
 
     except Exception as e:
         print(f'Ошибка в работе программы: {e}')
+        sys.exit(1)
 
 
 if __name__ == '__main__':

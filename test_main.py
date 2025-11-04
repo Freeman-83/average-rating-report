@@ -6,7 +6,6 @@ from main import (
     get_parser_args,
     create_report_data,
     print_report_table,
-    main
 )
 
 tests_args_data = {
@@ -21,10 +20,6 @@ tests_args_data = {
         '--report', 'average-rating'
     ],
     'empty_args': ['--report', '', '--files', ''],
-    'incorrect_name_args': [
-        '--report', 'nonexistent_report',
-        '--files', 'nonexistent_file.csv'
-    ],
     'incorrect_type_args': ['--report', 1, '--files', True],
 }
 
@@ -60,7 +55,7 @@ def test_get_parser_args_without_files():
 
     with pytest.raises(
         ArgumentError,
-        match='Не выбран параметр с файлами для составления отчета'
+        match='Не выбран параметр файлов для составления отчета'
     ):
         get_parser_args(
             tests_args_data['correct_args_without_files']
