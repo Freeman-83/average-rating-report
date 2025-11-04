@@ -159,7 +159,7 @@ def test_print_report_data(capfd: pytest.CaptureFixture[str]):
     expected_table = '''average-rating
 +----+---------+----------+
 |    | brand   |   rating |
-+====+=========+==========+
+|----+---------+----------|
 |  1 | apple   |     4.55 |
 |  2 | samsung |     4.53 |
 |  3 | xiaomi  |     4.37 |

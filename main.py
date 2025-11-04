@@ -116,7 +116,7 @@ def print_report_table(
     report_table = tabulate(
         report_data,
         headers=headers,
-        tablefmt='outline',
+        tablefmt='psql',
         showindex=range(1, len(report_data) + 1)
     )
 
