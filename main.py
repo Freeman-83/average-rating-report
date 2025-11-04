@@ -2,17 +2,23 @@ import csv
 import os
 import sys
 
-from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
+from argparse import (
+    ArgumentError,
+    ArgumentParser,
+    ArgumentTypeError,
+    Namespace
+)
+
 from tabulate import tabulate
 
 
 REPORT_CHOISES = {
     'average-rating': ['brand', 'rating'],
-    # 'average-price': ['brand', 'price'],
+    # 'average-price': ['brand', 'price'], # добавление дополнительного отчета
 }
 
 
-def check_exist_parser_args(report_param, files_param, args):
+def check_exist_parser_args(report_param, files_param, args) -> None:
     """Вспомогательная функция проверки наличия аргументов."""
 
     if not args.report:
@@ -23,16 +29,16 @@ def check_exist_parser_args(report_param, files_param, args):
         raise ArgumentError(
             files_param, 'Не выбран параметр файлов для составления отчета'
         )
-    
 
-def check_empty_input(arg):
+
+def check_empty_input(arg) -> str | None:
     """Вспомогательная функция проверки непустого ввода."""
     if not arg:
         raise ArgumentTypeError('Пустой ввод значения аргумета')
     return arg
 
 
-def get_parser_args(args=None):
+def get_parser_args(args=None) -> Namespace:
     """Функция получения аргументов командной строки."""
 
     parser = ArgumentParser(description='Report Parser')
@@ -57,7 +63,11 @@ def get_parser_args(args=None):
     return parser_args
 
 
-def create_report_data(report_name, files_data, dir_path) -> tuple:
+def create_report_data(
+    report_name: str,
+    files_data: list,
+    dir_path: str
+) -> tuple[str, list]:
     """Функция парсинга csv файлов и формирования сводного отчета."""
 
     position_value, culculated_value = REPORT_CHOISES[report_name]
@@ -74,8 +84,13 @@ def create_report_data(report_name, files_data, dir_path) -> tuple:
                         row[position_value], []
                     ).append(float(row[culculated_value]))
 
-        except:
-            raise Exception(
+        except KeyError:
+            raise KeyError(
+                f'В файле {current_file} отсутствует позиция {position_value}'
+            )
+
+        except Exception:
+            raise FileNotFoundError(
                 f'Несуществующая директория или файл "{current_files_path}"'
             )
 
@@ -94,17 +109,17 @@ def print_report_table(
     report_name: str,
     report_data: list,
     headers: list
-):
+) -> None:
     """Функция консольного вывода отчетной таблицы."""
 
-    table = tabulate(
+    report_table = tabulate(
         report_data,
         headers=headers,
         tablefmt='outline',
         showindex=range(1, len(report_data) + 1)
     )
 
-    print(report_name, table, sep='\n')
+    print(report_name, report_table, sep='\n')
 
 
 def main():
