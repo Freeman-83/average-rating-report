@@ -87,12 +87,12 @@ def create_report_data(
 
         except KeyError:
             raise KeyError(
-                f'В файле "{current_file}" отсутствует позиция "{position_value}"'
+                f'В файле {current_file} отсутствует позиция {position_value}'
             )
 
         except Exception:
             raise FileNotFoundError(
-                f'Несуществующая директория или файл "{current_files_path}"'
+                f'Несуществующая директория или файл {current_files_path}'
             )
 
     report_data = [
